@@ -70,14 +70,6 @@ export const applyForJob = async (req, res) => {
     if (isBlocked) {
       const cachedAdvice = await redis.get(scoreCacheKey);
       const ttl = await redis.ttl(cooldownKey);
-      console.log("🎯 Raw AI output:\n", text);
-
-      let match = text.match(/Match Score:\s*(\d{1,3})/i);
-      if (!match) {
-        match = text.match(/(\d{1,3})\s*\/\s*100/);
-      }
-      const score = match ? parseInt(match[1], 10) : 0;
-      console.log("🏷 Parsed score:", score);
       const match = cachedAdvice?.match(/Match Score:\s*(\d+)/i);
       const score = match ? parseInt(match[1], 10) : null;
       const expiryTimestamp = Date.now() + ttl * 1000;
