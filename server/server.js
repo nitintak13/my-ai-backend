@@ -14,7 +14,8 @@ const app = express();
 connectDB();
 await connectCloudinary();
 const corsOptions = {
-  origin: "https://smart-apply-indol.vercel.app",
+  // origin: "https://smart-apply-indol.vercel.app",
+  origin: "http://localhost:5173",
   credentials: true,
 };
 app.options("*", cors(corsOptions));
@@ -26,10 +27,21 @@ app.post(
   bodyParser.raw({ type: "application/json" }),
   clerkWebhooks
 );
+
+// IMPORTANT: apply express.json() only for other routes
 app.use((req, res, next) => {
   if (req.path === "/webhooks") return next();
   express.json()(req, res, next);
 });
+// app.post(
+//   "/webhooks",
+//   bodyParser.raw({ type: "application/json" }),
+//   clerkWebhooks
+// );
+// app.use((req, res, next) => {
+//   if (req.path === "/webhooks") return next();
+//   express.json()(req, res, next);
+// });
 app.use(clerkMiddleware());
 
 app.get("/", (req, res) => res.send("API Working"));
@@ -38,9 +50,20 @@ app.post("/webhooks", clerkWebhooks);
 app.use("/api/company", companyRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/users", userRoutes);
+import axios from "axios";
+
+const testFastAPI = async () => {
+  try {
+    const res = await axios.get("http://localhost:8000/health"); // or /match/test route
+    console.log(res.data);
+  } catch (err) {
+    console.error("❌ FastAPI not reachable", err.message);
+  }
+};
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  testFastAPI();
 });

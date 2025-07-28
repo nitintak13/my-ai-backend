@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+
+python-dotenv
+pydantic
+pinecone>=3.0.0
+pydantic-settings
+
+sentence-transformers
+langchain
+httpx
+openai
+beautifulsoap4

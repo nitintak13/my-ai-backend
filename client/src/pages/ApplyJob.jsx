@@ -33,8 +33,11 @@ export default function ApplyJob() {
     (async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/api/jobs/${id}`);
-        if (data.success) setJobData(data.job);
-        else toast.error(data.message);
+        if (data.success) {
+          setJobData(data.job);
+        } else {
+          toast.error(data.message || "Failed to load job details");
+        }
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -67,27 +70,31 @@ export default function ApplyJob() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      console.log("API Match Response:", data);
+
       if (!data.success || data.rateLimited) {
         if (data.retryAfter) {
-          const retry = new Date(data.retryAfter);
+          const retryTime = new Date(data.retryAfter);
           toast.error(
-            `Retry after ${retry.toLocaleTimeString([], {
+            `Retry after ${retryTime.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })}`
           );
         } else {
-          toast.error(data.message || "Application error");
+          toast.error(data.message || "Application failed");
         }
         return;
       }
 
-      const adviceText =
-        data.advice?.split("Suggestions:")[1]?.trim() || data.advice;
-
+      // Build feedback object with all fields
       setFeedback({
         matchScore: data.matchScore,
-        advice: adviceText,
+        advice: data.advice,
+        missingSkills: data.missingSkills || [],
+        resumeSuggestions: data.resumeSuggestions || [],
+        resources: data.resources || [],
+        fitAnalysis: data.fitAnalysis || {},
         blocked: data.blocked,
       });
 
@@ -98,10 +105,10 @@ export default function ApplyJob() {
       fetchUserApplications();
 
       data.blocked
-        ? toast.warn("Low fit score. Improve your resume and try later.")
-        : toast.success(" Application submitted!");
+        ? toast.warn("Low fit score. Improve your resume and try again.")
+        : toast.success("Application submitted successfully!");
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
@@ -162,9 +169,81 @@ export default function ApplyJob() {
                 Fit Score: {feedback.matchScore}/100{" "}
                 {feedback.blocked ? "(Too Low)" : "(Good Match)"}
               </p>
-              <p className="mt-2 whitespace-pre-wrap">{feedback.advice}</p>
+
+              <h3 className="mt-4 font-medium">Advice</h3>
+              <p className="mt-1 whitespace-pre-wrap">{feedback.advice}</p>
+
+              {feedback.missingSkills.length > 0 && (
+                <>
+                  <h3 className="mt-4 font-medium">Missing Skills</h3>
+                  <ul className="list-disc list-inside text-red-700">
+                    {feedback.missingSkills.map((skill, idx) => (
+                      <li key={idx}>{skill}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {feedback.resumeSuggestions.length > 0 && (
+                <>
+                  <h3 className="mt-4 font-medium">Resume Suggestions</h3>
+                  <ul className="list-disc list-inside text-blue-700">
+                    {feedback.resumeSuggestions.map((tip, idx) => (
+                      <li key={idx}>{tip}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {feedback.resources.length > 0 && (
+                <>
+                  <h3 className="mt-4 font-medium">Resources</h3>
+                  <ul className="list-disc list-inside text-green-700">
+                    {feedback.resources.map((res, idx) => (
+                      <li key={idx}>
+                        <a
+                          href={res.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          {res.title || res.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {feedback.fitAnalysis.summary && (
+                <>
+                  <h3 className="mt-4 font-medium">Fit Analysis</h3>
+                  <p className="mt-1">{feedback.fitAnalysis.summary}</p>
+                  {feedback.fitAnalysis.strengths?.length > 0 && (
+                    <>
+                      <h4 className="mt-2 font-medium">Strengths</h4>
+                      <ul className="list-disc list-inside">
+                        {feedback.fitAnalysis.strengths.map((s, idx) => (
+                          <li key={idx}>{s}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {feedback.fitAnalysis.weaknesses?.length > 0 && (
+                    <>
+                      <h4 className="mt-2 font-medium">Weaknesses</h4>
+                      <ul className="list-disc list-inside">
+                        {feedback.fitAnalysis.weaknesses.map((w, idx) => (
+                          <li key={idx}>{w}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </>
+              )}
+
               {cooldownExpiry && (
-                <p className="mt-2 text-sm text-red-600">
+                <p className="mt-4 text-sm text-red-600">
                   Retry after{" "}
                   <strong>
                     {cooldownExpiry.toLocaleDateString()} at{" "}
@@ -179,6 +258,7 @@ export default function ApplyJob() {
           )}
         </div>
 
+        {/* Job Description */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-3">Job Description</h2>
           <div
@@ -187,6 +267,7 @@ export default function ApplyJob() {
           />
         </div>
 
+        {/* More Jobs */}
         <div>
           <h3 className="text-lg font-semibold mb-4">
             More jobs from {jobData.companyId?.name}

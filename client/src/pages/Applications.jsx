@@ -164,7 +164,7 @@ const Applications = () => {
                       </span>
                     </td>
                     <td className="px-4 py-2">
-                      {app.matchScore ? (
+                      {app.matchScore != null ? (
                         <span
                           className={`text-xs px-2 py-1 rounded ${
                             app.matchScore >= 60
@@ -179,7 +179,7 @@ const Applications = () => {
                       )}
                     </td>
                     <td className="px-4 py-2">
-                      {app.matchScore && app.aiAdvice ? (
+                      {app.matchScore != null ? (
                         <button
                           onClick={() =>
                             setOpenFeedbackIndex(
@@ -204,10 +204,79 @@ const Applications = () => {
           openFeedbackIndex === idx ? (
             <div
               key={`feedback-${idx}`}
-              className="mt-4 p-4 bg-yellow-50 border text-sm rounded whitespace-pre-line"
+              className="mt-4 p-4 bg-yellow-50 border text-sm rounded"
             >
-              <strong>Score:</strong> {app.matchScore}/100
-              <p className="mt-2">{app.aiAdvice}</p>
+              <p className="font-semibold">Fit Score: {app.matchScore}/100</p>
+              <p className="mt-2 whitespace-pre-wrap">{app.aiAdvice}</p>
+
+              {app.missingSkills?.length > 0 && (
+                <>
+                  <h4 className="mt-4 font-medium">Missing Skills</h4>
+                  <ul className="list-disc list-inside">
+                    {app.missingSkills.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {app.resumeSuggestions?.length > 0 && (
+                <>
+                  <h4 className="mt-4 font-medium">Resume Suggestions</h4>
+                  <ul className="list-disc list-inside">
+                    {app.resumeSuggestions.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {app.resources?.length > 0 && (
+                <>
+                  <h4 className="mt-4 font-medium">Resources</h4>
+                  <ul className="list-disc list-inside">
+                    {app.resources.map((r, i) => (
+                      <li key={i}>
+                        <a
+                          href={r.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          {r.title || r.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {app.fitAnalysis?.summary && (
+                <>
+                  <h4 className="mt-4 font-medium">Fit Analysis</h4>
+                  <p>{app.fitAnalysis.summary}</p>
+                  {app.fitAnalysis.strengths?.length > 0 && (
+                    <>
+                      <h5 className="mt-2 font-medium">Strengths</h5>
+                      <ul className="list-disc list-inside">
+                        {app.fitAnalysis.strengths.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {app.fitAnalysis.weaknesses?.length > 0 && (
+                    <>
+                      <h5 className="mt-2 font-medium">Weaknesses</h5>
+                      <ul className="list-disc list-inside">
+                        {app.fitAnalysis.weaknesses.map((w, i) => (
+                          <li key={i}>{w}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           ) : null
         )}
