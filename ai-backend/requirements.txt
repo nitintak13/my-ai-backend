@@ -11,4 +11,4 @@ langchain
 httpx
 openai
 beautifulsoup4
-langchain_groq
+langchain-groq
