@@ -147,8 +147,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load embedding model once
+
 # embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
+embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-albert-small-v2");
 
 
 # Initialize Pinecone index
