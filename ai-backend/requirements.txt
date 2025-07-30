@@ -13,4 +13,5 @@ openai
 beautifulsoup4
 langchain-groq
 langchain-pinecone
+langchain-huggingface
 
