@@ -4,7 +4,10 @@ from sklearn.preprocessing import normalize
 
 
 # model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-model = SentenceTransformer('sentence-transformers/paraphrase-MiniLM-L3-v2')
+# model = SentenceTransformer('sentence-transformers/paraphrase-MiniLM-L3-v2')
+# Replace with this lighter model
+model = SentenceTransformer('sentence-transformers/paraphrase-albert-small-v2')
+
 
 
 def embed_text(texts: List[str]) -> List[List[float]]:
