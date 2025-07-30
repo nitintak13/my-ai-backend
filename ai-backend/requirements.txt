@@ -10,4 +10,4 @@ sentence-transformers
 langchain
 httpx
 openai
-beautifulsoap4
+beautifulsoup4
